@@ -1,6 +1,6 @@
 import torch
 
-from my_pytorch_optimizers import *
+from .my_pytorch_optimizers import *
 from torch.optim.optimizer import  Optimizer
 
 

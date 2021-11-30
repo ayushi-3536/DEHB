@@ -9,9 +9,9 @@ import warnings
 import  time
 from dehb import DEHB
 import json
-from ladam import LAdam
-from my_adam import Adam
-from my_nadam import NAdam
+from .ladam import LAdam
+from .my_adam import Adam
+from .my_nadam import NAdam
 
 OPTIM_NAME_MAP = {'adam': Adam,
                   'nadam': NAdam}
