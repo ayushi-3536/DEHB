@@ -288,7 +288,7 @@ s = time.time()
 args = parser.parse_args()
 e = AdamOnSynthFuncEnv(fixed=True,loss_func=args.loss)
 e.register_teacher(Adam)
-e.seed(12345)
+e.seed(args.run_id)
 e.reset()
 # for i in range(10):
 #     print("in loop")
