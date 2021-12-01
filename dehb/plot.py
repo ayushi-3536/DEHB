@@ -8,12 +8,12 @@ def load_json_file(path,spath,idx):
     fs = open(spath+'\\'+'_'+str(idx)+'.txt','w')
     data = (f.read().split("\n"))
     print(len(data))
-    for i in data:
-         #print(i)
-         line = json.loads(i)
-         print(line)
-         fs.write(str(line['r'])+' '+str(line['cost'])+'\n')
-
+    try:
+        for i in data:
+             line = json.loads(i)
+             fs.write(str(line['r'])+' '+str(line['cost'])+'\n')
+    except:
+        pass
     # Closing file
     f.close()
     fs.close()
@@ -25,6 +25,5 @@ os.chdir(path)
 result = glob.glob('*.{}'.format(extension))
 print(result)
 for idx,f in enumerate(result):
-    if(idx==1):
         load_json_file(path + '\\' + f,path,idx)
 
