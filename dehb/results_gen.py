@@ -199,5 +199,6 @@ ax.fill_between(T, mean - ste, mean + ste, color="y", alpha=0.2)
 # ax.set_yscale("log")
 ax.grid()
 plt.show()
+plt.savefig('rewardvstime.pdf', dpi=450)
 
 
