@@ -1,6 +1,6 @@
 # files dumped at base directory
 *.json
-*.pdf
+#*.pdf
 *.pkl
 *.out
 

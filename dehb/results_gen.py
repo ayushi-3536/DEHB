@@ -26,7 +26,7 @@ def plot_hv(reg_hv,times,ax):
 
 
 def graph(path,result):
-    file = ([np.loadtxt(path + '\\' + f) for f in result])
+    file = ([np.loadtxt(path + '/' + f) for f in result])
     print(file)
     #print(file.shape)
     reward_all = [r[:, 0] for r in file]
@@ -199,6 +199,6 @@ ax.fill_between(T, mean - ste, mean + ste, color="y", alpha=0.2)
 # ax.set_yscale("log")
 ax.grid()
 plt.show()
-plt.savefig('rewardvstime.pdf', dpi=450)
+plt.savefig('/work/dlclarge1/awad-dehb/DEHB/rewardvstime.pdf', dpi=450)
 
 
