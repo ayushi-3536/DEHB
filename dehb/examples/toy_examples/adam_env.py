@@ -251,7 +251,7 @@ class AdamOnSynthFuncEnv(Env):
             self.__prev_state = state.copy()
             return state
 
-    def step(self, action):
+    def step(self, action,max_step):
         start = time.time()
         # if not np.isscalar(action) and action is not None:
         #     action = action[0]
@@ -273,7 +273,7 @@ class AdamOnSynthFuncEnv(Env):
 
         self.__prev_fval = tmp.copy()
 
-        done = self.total_steps >= self._max_steps
+        done = self.total_steps >= int(max_step)
         self.__sum_r += r
 
         self.teacher_update_x()
@@ -298,7 +298,7 @@ e.logger.info('DONE')
 
 def f(config,budget):
     #print("budget",budget)
-    compute_state, r, done,cost,_ = e.step(config)
+    compute_state, r, done,cost,_ = e.step(config,budget)
     #, _= res
     print("compute state",compute_state)
     print("r:",r)
