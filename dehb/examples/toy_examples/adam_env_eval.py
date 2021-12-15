@@ -7,7 +7,6 @@ from botorch.test_functions.synthetic import Beale, Branin, Ackley, Bukin, EggHo
 import argparse
 import warnings
 import  time
-from dehb import DEHB
 import json
 from .ladam import LAdam
 from .my_adam import Adam
@@ -61,6 +60,9 @@ parser.add_argument('--version', default=None, type=str, nargs='?',
                     help='version of DEHB to run')
 parser.add_argument('--loss', default='beale', type=str, nargs='?',
                     help='loss function')
+parser.add_argument('--path', default='C:\\Users\\ayush\\PycharmProjects\\dehbexp\\DEHB\\final\\bukin',
+                    type=str,  help='path for json file to read')
+args= parser.parse_args()
 class AdamOnSynthFuncEnv(Env):
 
     def __init__(self, fixed=False, act_low=1e-5, act_high=5, loss_func='beale', fixed_teacher=True):
@@ -256,7 +258,7 @@ class AdamOnSynthFuncEnv(Env):
         # if not np.isscalar(action) and action is not None:
         #     action = action[0]
         print("action",action)
-        action = action['action']
+        action = action#['action']
         print("action is",action)
         print(self.curr_x)
         f_val = self.loss_func(self.curr_x)
@@ -283,44 +285,48 @@ class AdamOnSynthFuncEnv(Env):
 
 
 import time
-s = time.time()
+import pandas as pd
+import os
+import glob
+import numpy as np
 
-args = parser.parse_args()
-e = AdamOnSynthFuncEnv(fixed=True,loss_func=args.loss)
+extension = 'json'
+# # path = 'C:\\Users\\ayush\\PycharmProjects\\dehbexp\\DEHB\\final\\bukin'
+# # path = 'C:\\Users\\ayush\\PycharmProjects\\dehbexp\\DEHB\\final\\branin'
+# path = 'C:\\Users\\ayush\\PycharmProjects\\dehbexp\\DEHB\\final\\ackley'
+# #path = 'C:\\Users\\ayush\\PycharmProjects\\dehbexp\\DEHB\\final\\beale'
+# #path = 'C:\\Users\\ayush\\PycharmProjects\\dehbexp\\DEHB\\final\\eggholder'
+os.chdir(args.path)
+result = glob.glob('*.{}'.format(extension))
+print(result)
+incumbent_values = []
+for f in result:
+    df = pd.read_json(f,lines=True)
+    print ("max reward:{}",df["r"].max())
+    action = df.iloc[df["r"].idxmax()]['configuration']['action']
+    print("action:{}",action)
+    incumbent_values.append(action)
+    print("max value index:{}",df["r"].idxmax())
+
+incumbent = np.mean(incumbent_values)
+print("incumbents:{}",incumbent)
+s = time.time()
+print("args loss fucn:{}",args.loss)
+e = AdamOnSynthFuncEnv(fixed=True, loss_func=args.loss)
 e.register_teacher(Adam)
 e.seed(args.run_id)
 e.reset()
-# for i in range(10):
-#     print("in loop")
-#     e.step(e.action_space.sample())
+for i in range(200):
+    print("in loop")
+    compute_state, r, done,cost,_ = e.step(incumbent)
+    print("os.get cwd:{}",os.getcwd())
+    with open(os.getcwd()+'dehb_eval_max_'+str(args.run_id)+'_'+str(args.loss)+'.json', 'a+')as f:
+        json.dump({'configuration': incumbent, 'r': r , 'cost':cost}, f)
+        f.write("\n")
 e.logger.info(f'{e.observation_space}')
 e.logger.info('DONE')
 
-def f(config,budget):
-    #print("budget",budget)
-    compute_state, r, done,cost,_ = e.step(config)
-    #, _= res
-    print("compute state",compute_state)
-    print("r:",r)
-    print("done:",done)
-    with open('dehb_run_'+str(args.run_id)+'_'+str(args.loss)+'.json', 'a+')as f:
-        json.dump({'configuration': dict(config), 'r': r,'compute state':str(compute_state),'cost':cost}, f)
-        f.write("\n")
-    return -r, cost
 
 
 
 
-
-import ConfigSpace as CS
-cs = CS.ConfigurationSpace()
-val = UniformFloatHyperparameter('action', 1e-5, 5, default_value=0.001)
-cs.add_hyperparameters([val])
-# Initializing DEHB object
-# for i in range(10):
-#     print("sample",e.action_space.sample(),"cs sample",cs.sample_configuration()['action'])
-dehb = DEHB(cs=cs, f=f, strategy=args.strategy,
-            mutation_factor=args.mutation_factor, crossover_prob=args.crossover_prob,
-            eta=args.eta, min_budget=1, max_budget=200,
-            generations=args.gens, boundary_fix_type=args.boundary_fix_type)
-traj, runtime, history = dehb.run(iterations=1000)
